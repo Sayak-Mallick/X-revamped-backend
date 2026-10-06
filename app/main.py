@@ -1,37 +1,32 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 
-from app.api.router import app_router
-from app.core.config import settings
-from app.db.database import check_db_connection, close_db
+app = FastAPI()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    try:
-        await check_db_connection()
-        yield
-    finally:
-        try:
-            await close_db()
-        except Exception as e:
-            print(e)
+posts: list[dict] = [
+    {
+        "id": 1,
+        "author": "Sayak Mallick",
+        "title": "Post 1",
+        "content": "This is the content of post 1",
+        "created_at": "2025-05-22",
+    },
+    {
+        "id": 2,
+        "author": "Shubhajit Mallick",
+        "title": "Post 2",
+        "content": "This is the content of post 2",
+        "created_at": "2025-05-22",
+    },
+]
 
 
-app = FastAPI(
-    title=settings.app_name,
-    version="1.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi",
-    lifespan=lifespan,
-)
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 
-@app.get("/", include_in_schema=False)
-def read_root():
-    return {"message": "X-revamped-backend", "version": "1.0.0", "status": "running"}
-
-
-app.include_router(app_router)
+@app.get("/api/posts")
+async def get_posts():
+    return posts
+   
